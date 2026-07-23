@@ -16,13 +16,9 @@
   <link rel="preconnect" href="https://googleads.g.doubleclick.net" crossorigin>
   <link rel="preconnect" href="https://tpc.googlesyndication.com" crossorigin>
 
-  <script async
-    src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8819996017476509"
-    crossorigin="anonymous"></script>
-
   <style>
     .ads-slot { width: 100%; }
-    .ads-slot-content { min-height: 280px; }
+    .ads-slot-content { min-height: 120px; }
     .ads-slot-sidebar-top { min-height: 250px; }
     .ads-slot-sidebar-bottom { min-height: 600px; }
   </style>
@@ -70,7 +66,7 @@
 
         <div class="mt-3 flex justify-center">
           <ins class="adsbygoogle"
-               style="display:block; width:100%; min-height:280px;"
+               style="display:block; width:100%;"
                data-ad-client="{{ $adClient }}"
                data-ad-slot="{{ $slotTop }}"
                data-ad-format="auto"
