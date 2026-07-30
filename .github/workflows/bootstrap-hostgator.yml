@@ -42,7 +42,7 @@ jobs:
           printf '%s\n' "$HOSTGATOR_SSH_KEY_PASSPHRASE"
           EOF
           chmod 700 ~/.ssh/askpass
-          DISPLAY=1 SSH_ASKPASS=~/.ssh/askpass SSH_ASKPASS_REQUIRE=force ssh-add ~/.ssh/id_ed25519 < /dev/null
+          timeout 45s env DISPLAY=1 SSH_ASKPASS="$HOME/.ssh/askpass" SSH_ASKPASS_REQUIRE=force ssh-add ~/.ssh/id_ed25519 < /dev/null || { echo "::error title=Senha da chave SSH invalida::Atualize HOSTGATOR_SSH_KEY_PASSPHRASE com a senha da chave privada."; exit 1; }
           rm -f ~/.ssh/askpass
 
       - name: Initialize the server checkout without touching .env or storage

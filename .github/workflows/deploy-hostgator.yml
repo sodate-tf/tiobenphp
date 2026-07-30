@@ -70,7 +70,7 @@ jobs:
           printf '%s\n' "$HOSTGATOR_SSH_KEY_PASSPHRASE"
           EOF
           chmod 700 ~/.ssh/askpass
-          DISPLAY=1 SSH_ASKPASS=~/.ssh/askpass SSH_ASKPASS_REQUIRE=force ssh-add ~/.ssh/id_ed25519 < /dev/null
+          timeout 45s env DISPLAY=1 SSH_ASKPASS="$HOME/.ssh/askpass" SSH_ASKPASS_REQUIRE=force ssh-add ~/.ssh/id_ed25519 < /dev/null || { echo "::error title=Senha da chave SSH invalida::Atualize HOSTGATOR_SSH_KEY_PASSPHRASE com a senha da chave privada."; exit 1; }
           rm -f ~/.ssh/askpass
           test "$HOSTGATOR_SSH_USER" = "ad4d58b41" || { echo "::error title=HOSTGATOR_SSH_USER invalido::Atualize o secret com o usuario do cPanel, sem espacos."; exit 1; }
           test "$HOSTGATOR_APP_PATH" = "/home2/ad4d58b41/public_html/laravel_app" || { echo "::error title=HOSTGATOR_APP_PATH invalido::Atualize o secret com o caminho absoluto do Laravel."; exit 1; }
