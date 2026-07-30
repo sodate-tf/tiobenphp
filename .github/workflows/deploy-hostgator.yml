@@ -72,7 +72,9 @@ jobs:
           chmod 700 ~/.ssh/askpass
           DISPLAY=1 SSH_ASKPASS=~/.ssh/askpass SSH_ASKPASS_REQUIRE=force ssh-add ~/.ssh/id_ed25519 < /dev/null
           rm -f ~/.ssh/askpass
-          ssh -o BatchMode=yes -o StrictHostKeyChecking=yes "$HOSTGATOR_SSH_USER@$HOSTGATOR_SSH_HOST" "test -d '$HOSTGATOR_APP_PATH/.git'"
+          test "$HOSTGATOR_SSH_USER" = "ad4d58b41" || { echo "::error title=HOSTGATOR_SSH_USER invalido::Atualize o secret com o usuario do cPanel, sem espacos."; exit 1; }
+          test "$HOSTGATOR_APP_PATH" = "/home2/ad4d58b41/public_html/laravel_app" || { echo "::error title=HOSTGATOR_APP_PATH invalido::Atualize o secret com o caminho absoluto do Laravel."; exit 1; }
+          ssh -l "$HOSTGATOR_SSH_USER" -o BatchMode=yes -o StrictHostKeyChecking=yes "$HOSTGATOR_SSH_HOST" "test -d '$HOSTGATOR_APP_PATH/.git'"
 
       - name: Upload the Vite build as one consistent release
         run: |
@@ -80,4 +82,4 @@ jobs:
 
       - name: Update Laravel and clear stale caches
         run: |
-          ssh -o BatchMode=yes -o StrictHostKeyChecking=yes "$HOSTGATOR_SSH_USER@$HOSTGATOR_SSH_HOST" "set -e; cd '$HOSTGATOR_APP_PATH'; git fetch --prune origin main; git checkout main; git reset --hard origin/main; composer install --no-dev --prefer-dist --no-interaction --optimize-autoloader; php artisan migrate --force; php artisan optimize:clear; if php artisan list --raw | grep -qx 'responsecache:clear'; then php artisan responsecache:clear; fi; php artisan view:cache"
+          ssh -l "$HOSTGATOR_SSH_USER" -o BatchMode=yes -o StrictHostKeyChecking=yes "$HOSTGATOR_SSH_HOST" "set -e; cd '$HOSTGATOR_APP_PATH'; git fetch --prune origin main; git checkout main; git reset --hard origin/main; composer install --no-dev --prefer-dist --no-interaction --optimize-autoloader; php artisan migrate --force; php artisan optimize:clear; if php artisan list --raw | grep -qx 'responsecache:clear'; then php artisan responsecache:clear; fi; php artisan view:cache"
