@@ -20,9 +20,12 @@ jobs:
     timeout-minutes: 20
     env:
       HOSTGATOR_SSH_HOST: sh00092.hostgator.com.br
+      HOSTGATOR_SSH_PORT: "2222"
       HOSTGATOR_SSH_USER: ${{ secrets.HOSTGATOR_SSH_USER }}
       HOSTGATOR_APP_PATH: ${{ secrets.HOSTGATOR_APP_PATH }}
-      HOSTGATOR_SSH_KNOWN_HOSTS: sh00092.hostgator.com.br ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAICEeMa+L58GFrtFbrb4jp/SQW4pIR3Ix5KeHiKbGJdxT
+      HOSTGATOR_SSH_KNOWN_HOSTS: |
+        sh00092.hostgator.com.br ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAICEeMa+L58GFrtFbrb4jp/SQW4pIR3Ix5KeHiKbGJdxT
+        [sh00092.hostgator.com.br]:2222 ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAICEeMa+L58GFrtFbrb4jp/SQW4pIR3Ix5KeHiKbGJdxT
       HOSTGATOR_SSH_PRIVATE_KEY: ${{ secrets.HOSTGATOR_SSH_PRIVATE_KEY }}
       HOSTGATOR_SSH_KEY_PASSPHRASE: ${{ secrets.HOSTGATOR_SSH_KEY_PASSPHRASE }}
 
@@ -74,12 +77,12 @@ jobs:
           rm -f ~/.ssh/askpass
           test -n "$HOSTGATOR_SSH_USER" || { echo "::error title=HOSTGATOR_SSH_USER ausente::Cadastre o usuario do cPanel como secret."; exit 1; }
           test -n "$HOSTGATOR_APP_PATH" || { echo "::error title=HOSTGATOR_APP_PATH ausente::Cadastre o caminho absoluto do Laravel como secret."; exit 1; }
-          ssh -l "$HOSTGATOR_SSH_USER" -o BatchMode=yes -o StrictHostKeyChecking=yes "$HOSTGATOR_SSH_HOST" "test -d '$HOSTGATOR_APP_PATH/.git'"
+          ssh -p "$HOSTGATOR_SSH_PORT" -l "$HOSTGATOR_SSH_USER" -o BatchMode=yes -o StrictHostKeyChecking=yes "$HOSTGATOR_SSH_HOST" "test -d '$HOSTGATOR_APP_PATH/.git'"
 
       - name: Upload the Vite build as one consistent release
         run: |
-          scp -o BatchMode=yes -o StrictHostKeyChecking=yes -r public/build "$HOSTGATOR_SSH_USER@$HOSTGATOR_SSH_HOST:$HOSTGATOR_APP_PATH/public/"
+          scp -P "$HOSTGATOR_SSH_PORT" -o BatchMode=yes -o StrictHostKeyChecking=yes -r public/build "$HOSTGATOR_SSH_USER@$HOSTGATOR_SSH_HOST:$HOSTGATOR_APP_PATH/public/"
 
       - name: Update Laravel and clear stale caches
         run: |
-          ssh -l "$HOSTGATOR_SSH_USER" -o BatchMode=yes -o StrictHostKeyChecking=yes "$HOSTGATOR_SSH_HOST" "set -e; cd '$HOSTGATOR_APP_PATH'; git fetch --prune origin main; git checkout main; git reset --hard origin/main; composer install --no-dev --prefer-dist --no-interaction --optimize-autoloader; php artisan migrate --force; php artisan optimize:clear; if php artisan list --raw | grep -qx 'responsecache:clear'; then php artisan responsecache:clear; fi; php artisan view:cache"
+          ssh -p "$HOSTGATOR_SSH_PORT" -l "$HOSTGATOR_SSH_USER" -o BatchMode=yes -o StrictHostKeyChecking=yes "$HOSTGATOR_SSH_HOST" "set -e; cd '$HOSTGATOR_APP_PATH'; git fetch --prune origin main; git checkout main; git reset --hard origin/main; composer install --no-dev --prefer-dist --no-interaction --optimize-autoloader; php artisan migrate --force; php artisan optimize:clear; if php artisan list --raw | grep -qx 'responsecache:clear'; then php artisan responsecache:clear; fi; php artisan view:cache"
