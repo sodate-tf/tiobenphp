@@ -47,6 +47,6 @@ jobs:
 
       - name: Initialize the server checkout without touching .env or storage
         run: |
-          test "$HOSTGATOR_SSH_USER" = "a4d58b41" || { echo "::error title=HOSTGATOR_SSH_USER invalido::Atualize o secret com o usuario do cPanel, sem espacos."; exit 1; }
-          test "$HOSTGATOR_APP_PATH" = "/home2/a4d58b41/public_html/laravel_app" || { echo "::error title=HOSTGATOR_APP_PATH invalido::Atualize o secret com o caminho absoluto do Laravel."; exit 1; }
+          test -n "$HOSTGATOR_SSH_USER" || { echo "::error title=HOSTGATOR_SSH_USER ausente::Cadastre o usuario do cPanel como secret."; exit 1; }
+          test -n "$HOSTGATOR_APP_PATH" || { echo "::error title=HOSTGATOR_APP_PATH ausente::Cadastre o caminho absoluto do Laravel como secret."; exit 1; }
           ssh -l "$HOSTGATOR_SSH_USER" -o BatchMode=yes -o StrictHostKeyChecking=yes "$HOSTGATOR_SSH_HOST" "set -e; test -d '$HOSTGATOR_APP_PATH'; cd '$HOSTGATOR_APP_PATH'; test ! -d .git; backup_dir=\"\$HOME/iatioben-backups/\$(date +%Y%m%d-%H%M%S)\"; mkdir -p \"\$backup_dir\"; test ! -f .env || cp .env \"\$backup_dir/.env\"; git init; git remote add origin https://github.com/sodate-tf/tiobenphp.git; git fetch --depth=1 origin main; git reset --hard origin/main; test ! -f \"\$backup_dir/.env\" || cp \"\$backup_dir/.env\" .env; composer install --no-dev --prefer-dist --no-interaction --optimize-autoloader; php artisan optimize:clear; php artisan view:cache"
