@@ -77,7 +77,7 @@ jobs:
           echo "SSH key fingerprint loaded by GitHub:"
           ssh-add -l
           rm -f ~/.ssh/askpass
-          test -n "$HOSTGATOR_SSH_USER" || { echo "::error title=HOSTGATOR_SSH_USER ausente::Cadastre o usuario do cPanel como secret."; exit 1; }
+          test "$HOSTGATOR_SSH_USER" = "a4d58b41" || { echo "::error title=HOSTGATOR_SSH_USER invalido::O secret deve conter exatamente o usuario do cPanel."; exit 1; }
           test -n "$HOSTGATOR_APP_PATH" || { echo "::error title=HOSTGATOR_APP_PATH ausente::Cadastre o caminho absoluto do Laravel como secret."; exit 1; }
           ssh -p "$HOSTGATOR_SSH_PORT" -l "$HOSTGATOR_SSH_USER" -o BatchMode=yes -o StrictHostKeyChecking=yes "$HOSTGATOR_SSH_HOST" "test -d '$HOSTGATOR_APP_PATH/.git'"
 
