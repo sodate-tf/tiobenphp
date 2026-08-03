@@ -8,6 +8,10 @@ return new class extends Migration
 {
     public function up(): void
     {
+        if (Schema::hasTable('mobile_beta_testers')) {
+            return;
+        }
+
         Schema::create('mobile_beta_testers', function (Blueprint $table) {
             $table->id();
             $table->string('google_email', 255)->unique();
