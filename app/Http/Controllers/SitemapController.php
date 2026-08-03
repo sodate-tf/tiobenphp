@@ -77,6 +77,7 @@ class SitemapController extends Controller
             $this->sitemapNode("{$base}/sitemap-en.xml", $today),
             $this->sitemapNode("{$base}/sitemap-blog.xml", $today),
             $this->sitemapNode("{$base}/sitemap-webstories.xml", $today),
+            $this->sitemapNode("{$base}/sitemap-terco.xml", $today),
             $this->sitemapNode("{$base}/sitemap-terco-webstories.xml", $today),
             $this->sitemapNode("{$base}/sitemap-recent.xml", $today),
         ];

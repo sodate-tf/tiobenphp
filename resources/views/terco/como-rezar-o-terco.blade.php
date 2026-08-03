@@ -283,19 +283,6 @@
       {{-- MAIN --}}
       <section class="min-w-0 rounded-2xl border border-border bg-card p-4 shadow-sm sm:p-6 lg:p-8">
 
-        {{-- Anúncio topo do corpo --}}
-        <div class="rounded-2xl border border-border bg-card p-3 shadow-sm mb-6">
-          <p class="px-1 pb-2 text-[11px] font-semibold text-muted-foreground">Publicidade</p>
-          <div class="flex justify-center">
-            <ins class="adsbygoogle"
-              style="display:block; min-height:140px"
-              data-ad-client="{{ $ADS_CLIENT }}"
-              data-ad-slot="{{ $ADS_SLOT_BODY_TOP }}"
-              data-ad-format="auto"
-              data-full-width-responsive="true"></ins>
-          </div>
-          <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
-        </div>
 
         {{-- Resposta rápida --}}
         <section id="resposta-rapida" class="rounded-2xl border border-amber-200 bg-amber-50 p-4 sm:p-5 mb-6" aria-label="Resposta rápida">
@@ -427,19 +414,6 @@
           @endforeach
         </div>
 
-        {{-- Ad mobile (quando sidebar some) --}}
-        <div class="lg:hidden rounded-2xl border border-border bg-card p-3 shadow-sm mb-6">
-          <p class="px-1 pb-2 text-[11px] font-semibold text-muted-foreground">Publicidade</p>
-          <div class="flex justify-center">
-            <ins class="adsbygoogle"
-              style="display:block; min-height:100px; width:100%"
-              data-ad-client="{{ $ADS_CLIENT }}"
-              data-ad-slot="{{ $ADS_SLOT_SIDEBAR_MOBILE }}"
-              data-ad-format="auto"
-              data-full-width-responsive="true"></ins>
-          </div>
-          <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
-        </div>
 
         {{-- Dias da semana --}}
         <div class="prose prose-amber max-w-none font-reading leading-relaxed mb-4
@@ -475,19 +449,6 @@
           <h2 id="faq"><strong>Dúvidas frequentes</strong></h2>
         </div>
 
-        {{-- Anúncio antes do FAQ --}}
-        <div class="rounded-2xl border border-border bg-card p-3 shadow-sm mb-6">
-          <p class="px-1 pb-2 text-[11px] font-semibold text-muted-foreground">Publicidade</p>
-          <div class="flex justify-center">
-            <ins class="adsbygoogle"
-              style="display:block; min-height:140px"
-              data-ad-client="{{ $ADS_CLIENT }}"
-              data-ad-slot="{{ $ADS_SLOT_IN_ARTICLE_2 }}"
-              data-ad-format="auto"
-              data-full-width-responsive="true"></ins>
-          </div>
-          <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
-        </div>
 
         <div class="space-y-3 mb-6">
           @foreach([

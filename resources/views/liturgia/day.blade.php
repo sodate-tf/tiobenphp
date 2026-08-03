@@ -477,27 +477,6 @@
         @endif
       </header>
 
-      {{-- ANÚNCIO REAL - TOPO --}}
-      <section class="mb-6">
-        <div class="ads-slot rounded-xl border border-slate-200 bg-white p-4">
-          <p class="text-xs font-semibold tracking-wide text-amber-700 uppercase">Anúncio</p>
-
-          <div class="mt-3">
-            <ins class="adsbygoogle"
-                 style="display:block; width:100%;"
-                 data-ad-client="{{ $adClient }}"
-                 data-ad-slot="{{ $slotTop }}"
-                 data-ad-format="auto"
-                 data-full-width-responsive="true"></ins>
-          </div>
-
-          <script>
-            try {
-              (window.adsbygoogle = window.adsbygoogle || []).push({});
-            } catch (e) {}
-          </script>
-        </div>
-      </section>
 
       {{-- CARD CONTROLES + TABS --}}
       <section
@@ -743,7 +722,6 @@
     }
   }
 
-  function scheduleContentAd(tabId){ const panel = document.querySelector(`[data-panel="${tabId}"] .lit-panel`); if (!panel || panel.dataset.contentAdLoaded === "1") return; panel.dataset.contentAdLoaded = "1"; const target = document.createElement("div"); target.className = "lit-content-ad-target"; target.style.minHeight = "1px"; panel.appendChild(target); const observer = new IntersectionObserver((entries) => { if (!entries.some(entry => entry.isIntersecting)) return; observer.disconnect(); const section = document.createElement("section"); section.className = "lit-content-ad-reserve rounded-xl border border-slate-200 bg-white p-4 mt-8"; section.setAttribute("aria-label", "Publicidade"); section.innerHTML = `<p class="text-xs font-semibold tracking-wide text-amber-700 uppercase">Publicidade</p>`; const holder = document.createElement("div"); holder.className = "mt-3"; const ins = document.createElement("ins"); ins.className = "adsbygoogle"; ins.style.display = "block"; ins.style.width = "100%"; ins.dataset.adClient = contentAdClient; ins.dataset.adSlot = contentAdSlot; ins.dataset.adFormat = "fluid"; ins.dataset.adLayout = "in-article"; holder.appendChild(ins); section.appendChild(holder); target.replaceWith(section); try { (window.adsbygoogle = window.adsbygoogle || []).push({}); } catch (e) {} }, { threshold: 0.25 }); observer.observe(target); }
 
   function setActive(tabId){
     document.querySelectorAll('.tab-panel').forEach(p=>{
@@ -758,7 +736,6 @@
         : "tab-btn lit-tab snap-start shrink-0";
     });
 
-    scheduleContentAd(tabId);
   }
 
   const tabsRow = document.querySelector('.lit-tabs-row');
@@ -772,7 +749,6 @@
     if(id) setActive(id);
   });
 
-  scheduleContentAd(root.getAttribute("data-default-tab") || "");
 
   const minus = document.getElementById('font-minus');
   const plus  = document.getElementById('font-plus');
