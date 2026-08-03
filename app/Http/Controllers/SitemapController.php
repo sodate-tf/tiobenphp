@@ -106,6 +106,10 @@ class SitemapController extends Controller
 
         $urls[] = $this->node("{$base}/liturgia-diaria", $today, 'daily', '1.0');
         $urls[] = $this->node("{$base}/liturgia-diaria/ano/{$year}", $today, 'weekly', '0.9');
+        $urls[] = $this->node("{$base}/guias/liturgia-diaria", $today, 'weekly', '0.9');
+        $urls[] = $this->node("{$base}/guias/evangelho-do-dia", $today, 'weekly', '0.85');
+        $urls[] = $this->node("{$base}/guias/salmo-do-dia", $today, 'weekly', '0.85');
+        $urls[] = $this->node("{$base}/guias/calendario-liturgico", $today, 'weekly', '0.85');
 
         for ($month = 1; $month <= 12; $month++) {
             $mm = str_pad((string) $month, 2, '0', STR_PAD_LEFT);
@@ -358,6 +362,10 @@ class SitemapController extends Controller
         $urls[] = $this->node("{$base}/", $today, 'daily', '1.0');
         $urls[] = $this->node("{$base}/liturgia-diaria", $today, 'daily', '0.9');
         $urls[] = $this->node("{$base}/liturgia-diaria/{$today->format('d-m-Y')}", $today, 'daily', '1.0');
+        $urls[] = $this->node("{$base}/guias/liturgia-diaria", $today, 'weekly', '0.9');
+        $urls[] = $this->node("{$base}/guias/evangelho-do-dia", $today, 'weekly', '0.85');
+        $urls[] = $this->node("{$base}/guias/salmo-do-dia", $today, 'weekly', '0.85');
+        $urls[] = $this->node("{$base}/guias/calendario-liturgico", $today, 'weekly', '0.85');
         $urls[] = $this->node("{$base}/en/daily-mass-readings", $today, 'daily', '0.9');
         $urls[] = $this->node("{$base}/en/daily-mass-readings/{$today->format('m-d-Y')}", $today, 'daily', '1.0');
         $urls[] = $this->node("{$base}/blog", $today, 'daily', '0.9');
@@ -477,7 +485,7 @@ class SitemapController extends Controller
     private function ptBlogCategories(): array
     {
         // Slugs reais usados no BlogController::buildSections().
-        $fallback = ['liturgia', 'santos', 'terco', 'homilia', 'cotidiano', 'noticias'];
+        $fallback = ['liturgia', 'santos', 'terco', 'homilia'];
 
         if (!class_exists(Category::class) || !$this->tableExists('categories')) {
             return $fallback;

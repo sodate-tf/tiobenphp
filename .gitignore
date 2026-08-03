@@ -22,3 +22,8 @@
 Homestead.json
 Homestead.yaml
 Thumbs.db
+# Credenciais e dados locais que nunca podem seguir para o GitHub ou deploy.
+/mobile/credentials.json
+/mobile/credentials/
+/tmp-search-console-*/
+*.bak

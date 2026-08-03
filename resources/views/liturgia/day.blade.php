@@ -37,10 +37,6 @@
   <link rel="preconnect" href="https://tpc.googlesyndication.com" crossorigin>
 
   {{-- AdSense sem atraso --}}
-  <script async
-    src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8819996017476509"
-    crossorigin="anonymous"></script>
-
   <style>
     .lit-day-grid{ display:block; }
 
@@ -70,6 +66,8 @@
       font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
       letter-spacing:-0.01em;
     }
+
+    .lit-content-ad-reserve{ min-height:120px; }
 
     .lit-card{
       background:#fff;
@@ -212,7 +210,7 @@
 
     .ads-slot{
       width:100%;
-      min-height:280px;
+      min-height:120px;
     }
 
     .ads-slot-sidebar-top{
@@ -448,6 +446,9 @@
           </p>
         @endif
 
+        @include('liturgia.partials.mobile-beta-banner')
+
+
         <nav class="mt-4 grid grid-cols-3 gap-2 sm:flex sm:flex-wrap sm:gap-2" aria-label="Navegação por datas">
           <a href="{{ url('/liturgia-diaria/'.$prevSlug) }}" class="lit-btn">Ontem</a>
           <a href="{{ url('/liturgia-diaria/'.$todaySlug) }}" class="lit-btn lit-btn-primary">Hoje</a>
@@ -483,7 +484,7 @@
 
           <div class="mt-3">
             <ins class="adsbygoogle"
-                 style="display:block; width:100%; min-height:280px;"
+                 style="display:block; width:100%;"
                  data-ad-client="{{ $adClient }}"
                  data-ad-slot="{{ $slotTop }}"
                  data-ad-format="auto"
@@ -645,26 +646,6 @@
       </section>
 
       {{-- ANÚNCIO REAL - MEIO / IN-ARTICLE --}}
-      <section class="mt-8">
-        <div class="ads-slot rounded-xl border border-slate-200 bg-white p-4">
-          <p class="text-xs font-semibold tracking-wide text-amber-700 uppercase">Anúncio</p>
-
-          <div class="mt-3">
-            <ins class="adsbygoogle"
-                 style="display:block; width:100%; min-height:280px;"
-                 data-ad-client="{{ $adClient }}"
-                 data-ad-slot="{{ $slotMiddle }}"
-                 data-ad-format="fluid"
-                 data-ad-layout="in-article"></ins>
-          </div>
-
-          <script>
-            try {
-              (window.adsbygoogle = window.adsbygoogle || []).push({});
-            } catch (e) {}
-          </script>
-        </div>
-      </section>
 
       {{-- ANÚNCIO REAL - FINAL --}}
       <section class="mt-8">
@@ -673,7 +654,7 @@
 
           <div class="mt-3">
             <ins class="adsbygoogle"
-                 style="display:block; width:100%; min-height:280px;"
+                 style="display:block; width:100%;"
                  data-ad-client="{{ $adClient }}"
                  data-ad-slot="{{ $slotBottom }}"
                  data-ad-format="auto"
@@ -688,6 +669,18 @@
         </div>
       </section>
 
+      <section class="mt-8 rounded-2xl border border-amber-100 bg-amber-50/60 p-5" aria-labelledby="liturgia-guides-title">
+        <p class="text-xs font-bold uppercase tracking-wide text-amber-700">Aprofunde a sua oração</p>
+        <h2 id="liturgia-guides-title" class="mt-1 text-xl font-extrabold text-slate-900">Guias para rezar com a Liturgia</h2>
+        <p class="mt-2 text-sm leading-6 text-slate-700">Entenda cada parte das leituras e encontre um caminho simples para transformar a Palavra em oração diária.</p>
+        <div class="mt-4 grid gap-2 sm:grid-cols-2">
+          <a href="{{ url('/guias/liturgia-diaria') }}" class="rounded-xl bg-white px-3 py-3 text-sm font-bold text-slate-800 ring-1 ring-slate-200 hover:ring-amber-300">Como acompanhar a Liturgia Diária</a>
+          <a href="{{ url('/guias/evangelho-do-dia') }}" class="rounded-xl bg-white px-3 py-3 text-sm font-bold text-slate-800 ring-1 ring-slate-200 hover:ring-amber-300">Como rezar o Evangelho do dia</a>
+          <a href="{{ url('/guias/salmo-do-dia') }}" class="rounded-xl bg-white px-3 py-3 text-sm font-bold text-slate-800 ring-1 ring-slate-200 hover:ring-amber-300">Como rezar o Salmo responsorial</a>
+          <a href="{{ url('/guias/calendario-liturgico') }}" class="rounded-xl bg-white px-3 py-3 text-sm font-bold text-slate-800 ring-1 ring-slate-200 hover:ring-amber-300">Calendário litúrgico e ciclos da Igreja</a>
+        </div>
+        <a href="{{ url('/santo-terco') }}" class="mt-4 inline-flex text-sm font-bold text-amber-800 hover:text-amber-950">Continue a oração com o Santo Terço →</a>
+      </section>
       <footer class="mt-8 border-t border-slate-200 pt-6">
         <p class="text-xs text-slate-500 break-words">
           Compartilhe a Liturgia e ajude alguém a rezar hoje.
@@ -726,6 +719,10 @@
   const root = document.querySelector('[data-default-tab]');
   if(!root) return;
 
+  const contentAdClient = @json($adClient);
+  const contentAdSlot = @json($slotMiddle);
+
+
   const pageUrl = root.getAttribute('data-page-url') || window.location.href;
   const dateHuman = root.getAttribute('data-date-human') || '';
   const celebration = root.getAttribute('data-celebration') || 'Missa do dia';
@@ -746,6 +743,8 @@
     }
   }
 
+  function scheduleContentAd(tabId){ const panel = document.querySelector(`[data-panel="${tabId}"] .lit-panel`); if (!panel || panel.dataset.contentAdLoaded === "1") return; panel.dataset.contentAdLoaded = "1"; const target = document.createElement("div"); target.className = "lit-content-ad-target"; target.style.minHeight = "1px"; panel.appendChild(target); const observer = new IntersectionObserver((entries) => { if (!entries.some(entry => entry.isIntersecting)) return; observer.disconnect(); const section = document.createElement("section"); section.className = "lit-content-ad-reserve rounded-xl border border-slate-200 bg-white p-4 mt-8"; section.setAttribute("aria-label", "Publicidade"); section.innerHTML = `<p class="text-xs font-semibold tracking-wide text-amber-700 uppercase">Publicidade</p>`; const holder = document.createElement("div"); holder.className = "mt-3"; const ins = document.createElement("ins"); ins.className = "adsbygoogle"; ins.style.display = "block"; ins.style.width = "100%"; ins.dataset.adClient = contentAdClient; ins.dataset.adSlot = contentAdSlot; ins.dataset.adFormat = "fluid"; ins.dataset.adLayout = "in-article"; holder.appendChild(ins); section.appendChild(holder); target.replaceWith(section); try { (window.adsbygoogle = window.adsbygoogle || []).push({}); } catch (e) {} }, { threshold: 0.25 }); observer.observe(target); }
+
   function setActive(tabId){
     document.querySelectorAll('.tab-panel').forEach(p=>{
       p.classList.toggle('hidden', p.getAttribute('data-panel') !== tabId);
@@ -758,6 +757,8 @@
         ? "tab-btn lit-tab lit-tab-active snap-start shrink-0"
         : "tab-btn lit-tab snap-start shrink-0";
     });
+
+    scheduleContentAd(tabId);
   }
 
   const tabsRow = document.querySelector('.lit-tabs-row');
@@ -770,6 +771,8 @@
 
     if(id) setActive(id);
   });
+
+  scheduleContentAd(root.getAttribute("data-default-tab") || "");
 
   const minus = document.getElementById('font-minus');
   const plus  = document.getElementById('font-plus');

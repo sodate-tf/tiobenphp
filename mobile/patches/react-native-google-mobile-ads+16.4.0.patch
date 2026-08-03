@@ -1,0 +1,77 @@
+diff --git a/node_modules/react-native-google-mobile-ads/android/src/main/java/io/invertase/googlemobileads/ReactNativeGoogleMobileAdsCommon.java b/node_modules/react-native-google-mobile-ads/android/src/main/java/io/invertase/googlemobileads/ReactNativeGoogleMobileAdsCommon.java
+--- a/node_modules/react-native-google-mobile-ads/android/src/main/java/io/invertase/googlemobileads/ReactNativeGoogleMobileAdsCommon.java
++++ b/node_modules/react-native-google-mobile-ads/android/src/main/java/io/invertase/googlemobileads/ReactNativeGoogleMobileAdsCommon.java
+@@ -68,7 +68,8 @@ public class ReactNativeGoogleMobileAdsCommon {
+         return AdSize.getCurrentOrientationInlineAdaptiveBannerAdSize(
+             reactViewGroup.getContext(), adWidth);
+       }
+       if ("LARGE_ANCHORED_ADAPTIVE_BANNER".equals(preDefinedAdSize)) {
+-        return AdSize.getLargeAnchoredAdaptiveBannerAdSize(reactViewGroup.getContext(), adWidth);
++        return AdSize.getCurrentOrientationAnchoredAdaptiveBannerAdSize(
++            reactViewGroup.getContext(), adWidth);
+       }
+       return AdSize.getCurrentOrientationAnchoredAdaptiveBannerAdSize(
+           reactViewGroup.getContext(), adWidth);
+diff --git a/node_modules/react-native-google-mobile-ads/android/src/main/java/io/invertase/googlemobileads/ReactNativeGoogleMobileAdsModule.kt b/node_modules/react-native-google-mobile-ads/android/src/main/java/io/invertase/googlemobileads/ReactNativeGoogleMobileAdsModule.kt
+--- a/node_modules/react-native-google-mobile-ads/android/src/main/java/io/invertase/googlemobileads/ReactNativeGoogleMobileAdsModule.kt
++++ b/node_modules/react-native-google-mobile-ads/android/src/main/java/io/invertase/googlemobileads/ReactNativeGoogleMobileAdsModule.kt
+@@ -19,7 +19,6 @@
+ 
+ import com.facebook.react.bridge.*
+-import com.google.android.gms.ads.AgeRestrictedTreatment
+ import com.google.android.gms.ads.MobileAds
+ import com.google.android.gms.ads.initialization.OnInitializationCompleteListener
+ import com.google.android.gms.ads.RequestConfiguration
+@@ -80,16 +79,6 @@ class ReactNativeGoogleMobileAdsModule(
+     } else {
+       builder.setTagForUnderAgeOfConsent(RequestConfiguration.TAG_FOR_UNDER_AGE_OF_CONSENT_UNSPECIFIED)
+     }
+-
+-    if (requestConfiguration.hasKey("ageRestrictedTreatment")) {
+-      builder.setAgeRestrictedTreatment(
+-        when (requestConfiguration.getString("ageRestrictedTreatment")) {
+-          "child" -> AgeRestrictedTreatment.TRUE
+-          "teen" -> AgeRestrictedTreatment.FALSE
+-          else -> AgeRestrictedTreatment.UNSPECIFIED
+-        }
+-      )
+-    }
+ 
+     return builder.build()
+   }
+diff --git a/node_modules/react-native-google-mobile-ads/android/src/oldarch/io/invertase/googlemobileads/NativeAppModuleSpec.kt b/node_modules/react-native-google-mobile-ads/android/src/oldarch/io/invertase/googlemobileads/NativeAppModuleSpec.kt
+new file mode 100644
+--- /dev/null
++++ b/node_modules/react-native-google-mobile-ads/android/src/oldarch/io/invertase/googlemobileads/NativeAppModuleSpec.kt
+@@ -0,0 +1,31 @@
++package io.invertase.googlemobileads
++
++import com.facebook.react.bridge.Promise
++import com.facebook.react.bridge.ReactApplicationContext
++import com.facebook.react.bridge.ReactContextBaseJavaModule
++import com.facebook.react.bridge.ReadableMap
++
++abstract class NativeAppModuleSpec(reactContext: ReactApplicationContext) : ReactContextBaseJavaModule(reactContext) {
++  companion object {
++    const val NAME = "RNAppModule"
++  }
++
++  abstract fun initializeApp(options: ReadableMap, appConfig: ReadableMap, promise: Promise)
++  abstract fun setAutomaticDataCollectionEnabled(appName: String, enabled: Boolean)
++  abstract fun deleteApp(appName: String, promise: Promise)
++  abstract fun eventsNotifyReady(ready: Boolean)
++  abstract fun eventsGetListeners(promise: Promise)
++  abstract fun eventsPing(eventName: String, eventBody: ReadableMap, promise: Promise)
++  abstract fun eventsAddListener(eventName: String)
++  abstract fun eventsRemoveListener(eventName: String, all: Boolean)
++  abstract fun addListener(eventName: String)
++  abstract fun removeListeners(count: Double)
++  abstract fun metaGetAll(promise: Promise)
++  abstract fun jsonGetAll(promise: Promise)
++  abstract fun preferencesSetBool(key: String, value: Boolean, promise: Promise)
++  abstract fun preferencesSetString(key: String, value: String, promise: Promise)
++  abstract fun preferencesGetAll(promise: Promise)
++  abstract fun preferencesClearAll(promise: Promise)
++
++  override fun getName(): String = NAME
++}

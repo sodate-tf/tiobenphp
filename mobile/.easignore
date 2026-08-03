@@ -1,0 +1,10 @@
+node_modules/
+.expo/
+dist/
+build/
+android/
+ios/
+build-log-*.txt
+build-log.json
+emulator-screen.png
+npx

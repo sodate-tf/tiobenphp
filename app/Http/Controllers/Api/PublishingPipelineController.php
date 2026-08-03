@@ -15,152 +15,153 @@ use Illuminate\Support\Str;
 use App\Jobs\GenerateDiscoverCoverJob;
 use App\Services\IndexNowService;
 
-// ✅ se esse Job existir no seu projeto, garanta o import correto
+// âœ… se esse Job existir no seu projeto, garanta o import correto
 // use App\Jobs\GenerateDiscoverCoverJob;
 
 class PublishingPipelineController extends Controller
 {
-    private const MIN_ARTICLE_WORDS = 1100;
+    private const MIN_ARTICLE_WORDS = 850;
     private const MIN_H2_SECTIONS = 4;
     private const MIN_FAQ_QUESTIONS = 3;
+    private const MOD_AUTO_PUBLISHED = 'auto_published';
 
     /**
-     * ✅ PROMPT (JORNALISTA JOVEM / STORYTELLING / BLOCOS [liturgia] [terco] [SEO])
+     * âœ… PROMPT (JORNALISTA JOVEM / STORYTELLING / BLOCOS [liturgia] [terco] [SEO])
      */
     private const YOUNG_LITURGY_WRITER_PROMPT = <<<PROMPT
-Você é Tio Ben, jornalista católico contemporâneo e colaborador do Blog IA Tio Ben.
+VocÃª Ã© Tio Ben, jornalista catÃ³lico contemporÃ¢neo e colaborador do Blog IA Tio Ben.
 
-Seu estilo é:
+Seu estilo Ã©:
 
-• humano, acolhedor, pastoral  
-• fiel ao ensinamento da Igreja Católica  
-• jovem no espírito, mas maduro na linguagem  
-• leve e acessível, sem linguagem acadêmica  
-• natural, sem exagero de gírias ou analogias  
+â€¢ humano, acolhedor, pastoral  
+â€¢ fiel ao ensinamento da Igreja CatÃ³lica  
+â€¢ jovem no espÃ­rito, mas maduro na linguagem  
+â€¢ leve e acessÃ­vel, sem linguagem acadÃªmica  
+â€¢ natural, sem exagero de gÃ­rias ou analogias  
 
 Evite:
-- gírias forçadas
-- excesso de comparações com cultura pop
-- tom caricatural ou performático
+- gÃ­rias forÃ§adas
+- excesso de comparaÃ§Ãµes com cultura pop
+- tom caricatural ou performÃ¡tico
 - linguagem infantilizada
 
-Use analogias apenas quando forem orgânicas ao tema.
-Use emojis com muita moderação (máx. 1 por seção, nunca em excesso).
-Nunca faça homilia direta ou explicação técnica bíblica.
-Aprofunde o tema através de narrativas humanas e situações reais.
+Use analogias apenas quando forem orgÃ¢nicas ao tema.
+Use emojis com muita moderaÃ§Ã£o (mÃ¡x. 1 por seÃ§Ã£o, nunca em excesso).
+Nunca faÃ§a homilia direta ou explicaÃ§Ã£o tÃ©cnica bÃ­blica.
+Aprofunde o tema atravÃ©s de narrativas humanas e situaÃ§Ãµes reais.
 
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-MISSÃO (FOCO PRINCIPAL)
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”
+MISSÃƒO (FOCO PRINCIPAL)
+â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”
 
-Recebendo [LITURGIA] e [KEYWORDS], escreva imediatamente um artigo completo (1500–2000 palavras) que:
+Recebendo [LITURGIA] e [KEYWORDS], escreva imediatamente um artigo completo (1500â€“2000 palavras) que:
 
-• Identifique o tema central unificador das leituras  
-• Desenvolva esse tema aplicando à vida cotidiana contemporânea  
-• Trabalhe profundidade espiritual com linguagem clara  
-• Use storytelling natural, sem exageros  
+â€¢ Identifique o tema central unificador das leituras  
+â€¢ Desenvolva esse tema aplicando Ã  vida cotidiana contemporÃ¢nea  
+â€¢ Trabalhe profundidade espiritual com linguagem clara  
+â€¢ Use storytelling natural, sem exageros  
 
-Referências bíblicas devem ser sutis e orgânicas.
-Não cite capítulos ou versículos.
+ReferÃªncias bÃ­blicas devem ser sutis e orgÃ¢nicas.
+NÃ£o cite capÃ­tulos ou versÃ­culos.
 
-Tamanho ideal: 1700–1900 palavras.
+Tamanho ideal: 1700â€“1900 palavras.
 
 Retorne SOMENTE o texto final em MARKDOWN.
-Não explique nada.
-Não peça confirmação.
-Não envolva em blocos de código.
+NÃ£o explique nada.
+NÃ£o peÃ§a confirmaÃ§Ã£o.
+NÃ£o envolva em blocos de cÃ³digo.
 
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”
 ENTRADA
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”
 [LITURGIA]
-📅 DD/MM/YYYY
-1ª Leitura: ...
+ðŸ“… DD/MM/YYYY
+1Âª Leitura: ...
 Salmo: ...
 Evangelho: ...
 [/LITURGIA]
 
 [KEYWORDS] ... [/KEYWORDS]
 
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”
 ESTRUTURA DO ARTIGO
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”
 
-# Título envolvente e reflexivo  
+# TÃ­tulo envolvente e reflexivo  
 Por Tio Ben, Blog IA Tio Ben
 
-Introdução:
-Comece com uma situação real ou pergunta existencial.
+IntroduÃ§Ã£o:
+Comece com uma situaÃ§Ã£o real ou pergunta existencial.
 Conecte naturalmente com o tema central.
 
 Desenvolvimento:
-• 4 a 6 seções com subtítulos claros  
-• Storytelling principal (600–900 palavras)  
-• Reflexões práticas e aplicáveis  
-• 6–10 aplicações concretas para a vida  
+â€¢ 4 a 6 seÃ§Ãµes com subtÃ­tulos claros  
+â€¢ Storytelling principal (600â€“900 palavras)  
+â€¢ ReflexÃµes prÃ¡ticas e aplicÃ¡veis  
+â€¢ 6â€“10 aplicaÃ§Ãµes concretas para a vida  
 
 FAQs:
-Inclua 3–5 perguntas reais que as pessoas fariam sobre o tema.
+Inclua 3â€“5 perguntas reais que as pessoas fariam sobre o tema.
 
-Fundamentação católica:
+FundamentaÃ§Ã£o catÃ³lica:
 Inclua um bloco curto com base em:
-- Catecismo da Igreja Católica (sem inventar número)
-- Tradição e vida sacramental
+- Catecismo da Igreja CatÃ³lica (sem inventar nÃºmero)
+- TradiÃ§Ã£o e vida sacramental
 - Exemplo de santo(s) quando fizer sentido
 
-Conclusão:
-Encerramento pastoral forte, convidando à ação interior.
+ConclusÃ£o:
+Encerramento pastoral forte, convidando Ã  aÃ§Ã£o interior.
 
-CTA final obrigatório:
+CTA final obrigatÃ³rio:
 "Bora mergulhar nas leituras de hoje? Acesse:
 https://www.iatioben.com.br/liturgia-diaria/[DATA-FORMATO-DD-MM-YYYY]
-e continue essa jornada. 🙏"
+e continue essa jornada. ðŸ™"
 
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-BLOCO FIXO — LITURGIA DO DIA
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”
+BLOCO FIXO â€” LITURGIA DO DIA
+â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”
 [liturgia]
-Texto breve (2–4 linhas) convidando à escuta diária da Palavra.
+Texto breve (2â€“4 linhas) convidando Ã  escuta diÃ¡ria da Palavra.
 
 Inclua:
 https://www.iatioben.com.br/liturgia-diaria/[DATA-FORMATO-DD-MM-YYYY]
 [/liturgia]
 
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-BLOCO FIXO — TERÇO DO DIA
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”
+BLOCO FIXO â€” TERÃ‡O DO DIA
+â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”
 [terco]
-Convite simples e reverente ao Santo Terço.
+Convite simples e reverente ao Santo TerÃ§o.
 
 Inclua:
 https://www.iatioben.com.br/santo-terco
 [/terco]
 
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-BLOCO FINAL — SEO
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”
+BLOCO FINAL â€” SEO
+â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”
 [SEO]
 {
 "keywords": ["6-8 palavras-chave naturais integrando [KEYWORDS]"],
-"metaDescription": "Frase pastoral clara, até 160 caracteres."
+"metaDescription": "Frase pastoral clara, atÃ© 160 caracteres."
 }
 [/SEO]
 
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”
 DIRETRIZES DE QUALIDADE
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”
 
-• Tom equilibrado: jovem + respeitoso  
-• Linguagem natural, sem teatralidade  
-• Profundidade espiritual sem moralismo  
-• Clareza > criatividade exagerada  
-• Acessível para qualquer idade  
+â€¢ Tom equilibrado: jovem + respeitoso  
+â€¢ Linguagem natural, sem teatralidade  
+â€¢ Profundidade espiritual sem moralismo  
+â€¢ Clareza > criatividade exagerada  
+â€¢ AcessÃ­vel para qualquer idade  
 
 Entregue SOMENTE o Markdown final.
 PROMPT;
 
     /**
-     * ✅ PROMPT — TRADUTOR (PT->EN) mantendo MARKDOWN e blocos
+     * âœ… PROMPT â€” TRADUTOR (PT->EN) mantendo MARKDOWN e blocos
      */
     private const EN_TRANSLATOR_PROMPT = <<<PROMPT
 You are a professional Catholic editor and translator for the "IA Tio Ben" blog.
@@ -224,8 +225,10 @@ PROMPT;
 
             $article->source_text    = $data['sourceText'] ?? null;
             $article->liturgy_source = $data['liturgySource'] ?? null;
+            $article->moderation_status = self::MOD_AUTO_PUBLISHED;
+            $article->auto_published = true;
 
-            // ✅ Gera e valida qualidade mínima antes de salvar
+            // âœ… Gera e valida qualidade mÃ­nima antes de salvar
             $article->content_raw = $this->generateHighQualityMarkdown($article);
 
             $article->save();
@@ -255,7 +258,7 @@ PROMPT;
             $article = PipelineArticle::find($id);
 
             if (!$article) {
-                return response()->json(['success' => false, 'message' => 'ID não encontrado.'], 200);
+                return response()->json(['success' => false, 'message' => 'ID nÃ£o encontrado.'], 200);
             }
 
             $rawMd = (string) ($article->content_raw ?? '');
@@ -263,7 +266,7 @@ PROMPT;
                 return response()->json(['success' => false, 'message' => 'Artigo sem content_raw.'], 200);
             }
 
-            // ✅ sanitiza antes de formatar (defensivo)
+            // âœ… sanitiza antes de formatar (defensivo)
             $rawMd = $this->sanitizeAiMarkdown($rawMd);
 
             $article->content_html = $formatter->formatArticleToHtml($rawMd);
@@ -285,37 +288,49 @@ PROMPT;
      * POST /api/seo-and-publish
      */
    public function seoAndPublish(Request $request, ArticleFormatter $formatter, IndexNowService $indexNow)
-   {
-    try {
-        $id = (string) ($request->json('id') ?? '');
-        $article = PipelineArticle::find($id);
+    {
+        try {
+            $id = (string) ($request->json('id') ?? '');
+            $article = PipelineArticle::find($id);
 
-        if (!$article) {
-            return response()->json(['success' => false, 'message' => 'ID não encontrado.'], 200);
-        }
+            if (!$article) {
+                return response()->json(['success' => false, 'message' => 'ID nao encontrado.'], 404);
+            }
 
-        $rawMd = (string) ($article->content_raw ?? '');
-        if (trim($rawMd) === '') {
-            return response()->json(['success' => false, 'message' => 'Artigo sem content_raw.'], 200);
-        }
+            $result = $this->publishPipelineArticle($article, $formatter, $indexNow, false);
+            if (($result['success'] ?? false) !== true) {
+                return response()->json($result, 422);
+            }
 
-        // ✅ sanitiza antes de tudo (evita publicar quebrado)
-        $rawMd = $this->sanitizeAiMarkdown($rawMd);
-        $quality = $this->qualityScore($rawMd);
-        if (($quality['approved'] ?? false) !== true) {
-            Log::warning('seoAndPublish bloqueado por qualidade mínima', [
-                'article_id' => $article->id,
-                'topic' => (string) $article->topic,
-                'score' => $quality,
-            ]);
+            return response()->json($result, 200);
+        } catch (\Throwable $e) {
+            Log::error('seoAndPublish failed', ['error' => $e->getMessage()]);
             return response()->json([
                 'success' => false,
-                'message' => 'Artigo abaixo do mínimo de qualidade. Gere novamente antes de publicar.',
-                'quality' => $quality,
-            ], 422);
+                'message' => 'Erro ao publicar artigo.',
+                'details' => $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    public function publishPipelineArticle(
+        PipelineArticle $article,
+        ArticleFormatter $formatter,
+        IndexNowService $indexNow,
+        bool $bypassQualityGate = false
+    ): array {
+        $rawMd = (string) ($article->content_raw ?? '');
+        if (trim($rawMd) === '') {
+            throw new \RuntimeException('Artigo sem content_raw.');
         }
 
-        // ✅ SEO do bloco [SEO] com fallback
+        $rawMd = $this->sanitizeAiMarkdown($rawMd);
+        $quality = $this->qualityScore($rawMd);
+
+        $article->quality_report = $quality;
+        $article->quality_checked_at = now();
+        $article->content_raw = $rawMd;
+
         $seo = $formatter->analyzeSeoAndExtractMetadata(
             $rawMd,
             (string) ($article->focus_keywords ?? '')
@@ -324,30 +339,23 @@ PROMPT;
         $keywordsArr = is_array($seo['keywords'] ?? null) ? $seo['keywords'] : [];
         $meta = (string) ($seo['metaDescription'] ?? '');
 
-        // ✅ título (do H1 do markdown) com fallback pro topic
         $title = $article->title ?: $this->extractH1TitleFromMarkdown($rawMd) ?: $this->buildTitle($article);
+        $slug = $article->slug ?: Str::slug($title);
+        $slug = $this->uniqueSlug($slug);
 
-        // slug único
-        $slug  = $article->slug ?: Str::slug($title);
-        $slug  = $this->uniqueSlug($slug);
-
-        // salva meta no pipeline
         $article->title = $title;
-        $article->slug  = $slug;
+        $article->slug = $slug;
         $article->meta_description = $meta ?: $this->buildMetaDescription($article);
         $article->keywords = implode(', ', array_map('strval', $keywordsArr));
-        $article->content_raw = $rawMd; // guarda sanitizado
-        $article->save();
 
-        // idioma (pt/en)
         $lang = 'pt';
         $rawLang = strtolower((string) ($article->language ?? 'pt-br'));
-        if (str_starts_with($rawLang, 'en')) $lang = 'en';
+        if (str_starts_with($rawLang, 'en')) {
+            $lang = 'en';
+        }
 
-        // categoria por agent
         $categoryName = $article->agent === 'saint' ? 'Santos' : 'Reflexões';
         $categoryId = Category::where('name', $categoryName)->value('id');
-
         if (!$categoryId) {
             $cat = new Category();
             $cat->name = $categoryName;
@@ -355,94 +363,97 @@ PROMPT;
             $categoryId = $cat->id;
         }
 
-        // ✅ HTML final: usa o já formatado; se não existir, formata agora
         $html = (string) ($article->content_html ?? '');
         if (trim($html) === '') {
             $html = $formatter->formatArticleToHtml($rawMd);
         }
-
-        // ✅ guard rail: não publique se ainda estiver embrulhado como code block
         if (str_contains($html, '<code class="language-markdown">')) {
             $html = $formatter->formatArticleToHtml($rawMd);
             if (str_contains($html, '<code class="language-markdown">')) {
-                throw new \RuntimeException('HTML ainda contém <code class="language-markdown">. Verifique sanitize/IA output.');
+                throw new \RuntimeException('HTML ainda contem <code class="language-markdown">. Verifique sanitize/IA output.');
             }
         }
 
-        // publicar no Post (PT)
         $post = new Post();
         $post->title = $title;
-        $post->slug  = $slug;
+        $post->slug = $slug;
         $post->content = $html;
-
-        $post->category_id      = $categoryId;
-        $post->keywords         = implode(', ', array_map('strval', $keywordsArr));
+        $post->category_id = $categoryId;
+        $post->keywords = implode(', ', array_map('strval', $keywordsArr));
         $post->meta_description = $article->meta_description ?? $meta;
-        $post->cover_image_url  = $article->cover_image_url ?: null;
-
+        $post->cover_image_url = $article->cover_image_url ?: null;
         $post->is_active = true;
 
         $publishAt = $article->date ? Carbon::parse($article->date)->startOfDay() : now();
         $post->publish_date = $publishAt;
         $post->expiry_date = null;
         $post->lang = $lang;
-
-        $post->uuid = (string) Str::uuid();
+        $post->uuid = $this->uniquePostUuid();
         $post->save();
 
-        // ✅ CORREÇÃO: volta a gerar capa do PT
         GenerateDiscoverCoverJob::dispatch($post->id);
 
         $article->published_at = now();
         $article->content_html = $html;
+        $article->moderation_status = self::MOD_AUTO_PUBLISHED;
+        $article->auto_published = true;
         $article->save();
 
-        // publica EN (e o método corrigido despacha capa EN)
         $postEn = $this->publishEnglishVersion($article, $formatter, $rawMd, $seo, $post);
-
         $siteUrl = rtrim((string) config('app.url', env('APP_URL', 'https://www.iatioben.com.br')), '/');
-
-        $indexNowUrls = [
+        $indexNow->submit([
             "{$siteUrl}/blog/{$post->slug}",
             "{$siteUrl}/en/blog/{$postEn->slug}",
-        ];
+        ]);
 
-        $indexNow->submit($indexNowUrls);
-
-        return response()->json([
+        return [
             'success' => true,
             'message' => 'Publicado com sucesso (PT + EN).',
             'post' => [
                 'pt' => ['id' => $post->id, 'slug' => $post->slug],
                 'en' => ['id' => $postEn->id, 'slug' => $postEn->slug],
             ],
-        ], 200);
-
-    } catch (\Throwable $e) {
-        Log::error('seoAndPublish failed', ['error' => $e->getMessage()]);
-        return response()->json([
-            'success' => false,
-            'message' => 'Erro ao publicar artigo.',
-            'details' => $e->getMessage(),
-        ], 500);
+            'quality' => $quality,
+            'moderation_status' => $article->moderation_status,
+        ];
     }
-}
-
-    // ---------------------------------------------------------------------
-    // ✅ AGENTE VIA OPENAI (Responses API)
+// ---------------------------------------------------------------------
+    // âœ… AGENTE VIA OPENAI (Responses API)
     // ---------------------------------------------------------------------
 
     private function runAgentViaOpenAI(PipelineArticle $a): string
     {
+        $prompt = $this->buildYoungLiturgyPrompt($a);
+        return $this->runOpenAiPrompt($prompt, 'OpenAI retornou sem os blocos obrigatorios.');
+    }
+
+    private function runAgentViaOpenAIWithQualityFeedback(PipelineArticle $a, array $score): string
+    {
+        $basePrompt = $this->buildYoungLiturgyPrompt($a);
+
+        $feedback = "\n\nCORRECAO OBRIGATORIA PARA APROVACAO DE QUALIDADE:\n"
+            . "- Minimo de " . self::MIN_ARTICLE_WORDS . " palavras no corpo do artigo.\n"
+            . "- Minimo de " . self::MIN_H2_SECTIONS . " secoes com subtitulo H2 (##).\n"
+            . "- Inclua uma secao FAQ com pelo menos " . self::MIN_FAQ_QUESTIONS . " perguntas em lista iniciando com '-' e terminando com '?'.\n"
+            . "- Garanta os blocos [liturgia], [terco] e [SEO].\n"
+            . "\nAvaliacao anterior:\n"
+            . "word_count=" . (int) ($score['word_count'] ?? 0) . "\n"
+            . "h2_count=" . (int) ($score['h2_count'] ?? 0) . "\n"
+            . "faq_questions=" . (int) ($score['faq_questions'] ?? 0) . "\n"
+            . "\nReescreva o artigo completo, melhor, mais profundo e 100% aderente aos requisitos.";
+
+        return $this->runOpenAiPrompt($basePrompt . $feedback, 'OpenAI retry retornou sem os blocos obrigatorios.');
+    }
+
+    private function runOpenAiPrompt(string $prompt, string $emptyMessage): string
+    {
         $apiKey = trim((string) env('OPENAI_API_KEY', ''));
         if ($apiKey === '') {
-            throw new \RuntimeException('OPENAI_API_KEY não configurada no .env.');
+            throw new \RuntimeException('OPENAI_API_KEY nao configurada no .env.');
         }
 
         $model = trim((string) env('OPENAI_MODEL', 'gpt-4.1-mini'));
         $timeout = (int) env('OPENAI_TIMEOUT', 180);
-
-        $prompt = $this->buildYoungLiturgyPrompt($a);
 
         $res = Http::timeout($timeout)
             ->withToken($apiKey)
@@ -450,18 +461,12 @@ PROMPT;
             ->asJson()
             ->post('https://api.openai.com/v1/responses', [
                 'model' => $model,
-                'input' => [
-                    [
-                        'role' => 'user',
-                        'content' => [
-                            ['type' => 'input_text', 'text' => $prompt],
-                        ],
-                    ],
-                ],
-                'text' => [
-                    'format' => ['type' => 'text'],
-                ],
-                'max_output_tokens' => 2500,
+                'input' => [[
+                    'role' => 'user',
+                    'content' => [['type' => 'input_text', 'text' => $prompt]],
+                ]],
+                'text' => ['format' => ['type' => 'text']],
+                'max_output_tokens' => 2200,
             ]);
 
         if (!$res->ok()) {
@@ -469,30 +474,29 @@ PROMPT;
         }
 
         $json = $res->json() ?: [];
-
         $text = '';
         foreach (($json['output'] ?? []) as $item) {
             if (($item['type'] ?? '') !== 'message') continue;
-            foreach (($item['content'] ?? []) as $c) {
-                if (($c['type'] ?? '') === 'output_text') {
-                    $text .= (string) ($c['text'] ?? '');
+            foreach (($item['content'] ?? []) as $chunk) {
+                if (($chunk['type'] ?? '') === 'output_text') {
+                    $text .= (string) ($chunk['text'] ?? '');
                 }
             }
         }
 
         $text = trim($text);
         if ($text === '') {
-            throw new \RuntimeException('OpenAI retornou texto vazio.');
+            throw new \RuntimeException($emptyMessage);
         }
 
         if (!str_contains($text, '[liturgia]') || !str_contains($text, '[/liturgia]')) {
-            throw new \RuntimeException('IA retornou sem bloco obrigatório [liturgia].');
+            throw new \RuntimeException('IA retornou sem bloco obrigatorio [liturgia].');
         }
         if (!str_contains($text, '[terco]') || !str_contains($text, '[/terco]')) {
-            throw new \RuntimeException('IA retornou sem bloco obrigatório [terco].');
+            throw new \RuntimeException('IA retornou sem bloco obrigatorio [terco].');
         }
         if (!str_contains($text, '[SEO]') || !str_contains($text, '[/SEO]')) {
-            throw new \RuntimeException('IA retornou sem bloco obrigatório [SEO].');
+            throw new \RuntimeException('IA retornou sem bloco obrigatorio [SEO].');
         }
 
         return $text;
@@ -514,25 +518,15 @@ PROMPT;
             return $sanitized;
         }
 
-        Log::warning('Pipeline quality gate: primeira geração abaixo do mínimo, tentando novamente.', [
+        Log::warning('Pipeline quality gate: tentativa 1 abaixo do minimo; evitando segunda geracao completa.', [
             'topic' => (string) $article->topic,
             'agent' => (string) $article->agent,
+            'score' => $firstScore,
         ]);
 
-        $retry = $this->runAgentViaOpenAI($article);
-        $retrySanitized = $this->sanitizeAiMarkdown($retry);
-        $retryScore = $this->qualityScore($retrySanitized);
-
-        Log::info('Pipeline quality gate: tentativa 2', [
-            'topic' => (string) $article->topic,
-            'agent' => (string) $article->agent,
-            'score' => $retryScore,
-        ]);
-
-        return $retrySanitized;
+        return $sanitized;
     }
-
-    private function qualityScore(string $markdown): array
+private function qualityScore(string $markdown): array
     {
         $clean = trim($markdown);
         $withoutSeo = preg_replace('/\[SEO\][\s\S]*?\[\/SEO\]/i', '', $clean) ?? $clean;
@@ -575,7 +569,7 @@ PROMPT;
     {
         $apiKey = trim((string) env('OPENAI_API_KEY', ''));
         if ($apiKey === '') {
-            throw new \RuntimeException('OPENAI_API_KEY não configurada no .env.');
+            throw new \RuntimeException('OPENAI_API_KEY nÃ£o configurada no .env.');
         }
 
         $model = trim((string) env('OPENAI_MODEL_TRANSLATOR', env('OPENAI_MODEL', 'gpt-4.1-mini')));
@@ -633,13 +627,13 @@ PROMPT;
         }
 
         if (!str_contains($text, '[liturgia]') || !str_contains($text, '[/liturgia]')) {
-            throw new \RuntimeException('Translator retornou sem bloco obrigatório [liturgia].');
+            throw new \RuntimeException('Translator retornou sem bloco obrigatÃ³rio [liturgia].');
         }
         if (!str_contains($text, '[terco]') || !str_contains($text, '[/terco]')) {
-            throw new \RuntimeException('Translator retornou sem bloco obrigatório [terco].');
+            throw new \RuntimeException('Translator retornou sem bloco obrigatÃ³rio [terco].');
         }
         if (!str_contains($text, '[SEO]') || !str_contains($text, '[/SEO]')) {
-            throw new \RuntimeException('Translator retornou sem bloco obrigatório [SEO].');
+            throw new \RuntimeException('Translator retornou sem bloco obrigatÃ³rio [SEO].');
         }
 
         return $text;
@@ -653,7 +647,7 @@ PROMPT;
 
         $liturgy = trim((string) ($a->liturgy_source ?? ''));
         if ($liturgy === '') {
-            $liturgy = "📅 {$ddmmyyyy}\n1ª Leitura: (não informada)\nSalmo: (não informado)\nEvangelho: (não informado)";
+            $liturgy = "ðŸ“… {$ddmmyyyy}\n1Âª Leitura: (nÃ£o informada)\nSalmo: (nÃ£o informado)\nEvangelho: (nÃ£o informado)";
         }
 
         $keywords = trim((string) ($a->focus_keywords ?? ''));
@@ -669,11 +663,11 @@ PROMPT;
     }
 
     // ---------------------------------------------------------------------
-    // ✅ helpers
+    // âœ… helpers
     // ---------------------------------------------------------------------
 
     /**
-     * ✅ impede que o output venha embrulhado em ```markdown ... ```
+     * âœ… impede que o output venha embrulhado em ```markdown ... ```
      */
     private function sanitizeAiMarkdown(string $text): string
     {
@@ -715,13 +709,13 @@ PROMPT;
     $keywordsArrEn = is_array($seoEn['keywords'] ?? null) ? $seoEn['keywords'] : [];
     $metaEn = (string) ($seoEn['metaDescription'] ?? '');
 
-    // 3) Título EN do H1
+    // 3) TÃ­tulo EN do H1
     $titleEn = $this->extractH1TitleFromMarkdown($translatedMd);
     if (trim($titleEn) === '') {
         $titleEn = ($article->title ? ($article->title . ' (EN)') : 'Article');
     }
 
-    // 4) Slug EN (ideal: slug do título EN; fallback: slug PT + "-en")
+    // 4) Slug EN (ideal: slug do tÃ­tulo EN; fallback: slug PT + "-en")
     $baseSlugEn = Str::slug($titleEn);
     if ($baseSlugEn === '') {
         $baseSlugEn = Str::slug(($postPt->slug ?? 'post') . '-en');
@@ -749,7 +743,7 @@ PROMPT;
 
     $postEn->category_id      = $categoryIdEn;
     $postEn->keywords         = implode(', ', array_map('strval', $keywordsArrEn));
-    $postEn->meta_description = $metaEn !== '' ? $metaEn : 'Catholic reflection on today’s theme at IA Tio Ben.';
+    $postEn->meta_description = $metaEn !== '' ? $metaEn : 'Catholic reflection on todayâ€™s theme at IA Tio Ben.';
     $postEn->cover_image_url  = $article->cover_image_url ?: null;
 
     $postEn->is_active = true;
@@ -760,11 +754,11 @@ PROMPT;
     $postEn->expiry_date = null;
     $postEn->lang = 'en';
 
-    // Mantém o mesmo uuid para parear PT<->EN de forma confiável.
-    $postEn->uuid = (string) ($postPt->uuid ?: Str::uuid());
+    // Em bases com uuid unico, EN precisa de uuid proprio para nao colidir.
+    $postEn->uuid = $this->uniquePostUuid();
     $postEn->save();
 
-    // ✅ CORREÇÃO: despacha capa para o post EN recém criado
+    // âœ… CORREÃ‡ÃƒO: despacha capa para o post EN recÃ©m criado
     GenerateDiscoverCoverJob::dispatch($postEn->id);
 
     return $postEn;
@@ -790,7 +784,7 @@ PROMPT;
     {
         $t = trim((string) $a->topic);
         if ($t === '') $t = 'tema de hoje';
-        return "Reflexão católica sobre {$t} no IA Tio Ben.";
+        return "ReflexÃ£o catÃ³lica sobre {$t} no IA Tio Ben.";
     }
 
     private function uniqueSlug(string $base): string
@@ -809,4 +803,15 @@ PROMPT;
 
         return $slug;
     }
+
+    private function uniquePostUuid(): string
+    {
+        do {
+            $uuid = (string) Str::uuid();
+        } while (Post::where('uuid', $uuid)->exists());
+
+        return $uuid;
+    }
 }
+
+

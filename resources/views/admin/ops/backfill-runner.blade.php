@@ -10,6 +10,26 @@
       Use primeiro os modos <strong>DRY-RUN</strong> e só depois rode em <strong>WRITE</strong>.
     </div>
 
+    <div class="rounded-2xl border border-slate-200 bg-white p-4 text-sm text-slate-700">
+      Precisa rodar comando manual sem SSH?
+      @if(\Illuminate\Support\Facades\Route::has('admin.ops.artisan.index'))
+        <a href="{{ route('admin.ops.artisan.index') }}" class="font-semibold text-slate-900 underline">
+          Abrir Console Artisan
+        </a>
+      @else
+        <span class="font-semibold text-slate-500">Console Artisan indisponivel no momento.</span>
+      @endif
+    </div>
+
+    <div class="rounded-2xl border border-slate-200 bg-white p-4 text-sm text-slate-700">
+      Quer gerar um post por tema agora?
+      @if(\Illuminate\Support\Facades\Route::has('admin.ops.generator.create'))
+        <a href="{{ route('admin.ops.generator.create') }}" class="font-semibold text-slate-900 underline">
+          Abrir Gerador de Post IA
+        </a>
+      @endif
+    </div>
+
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
       <form method="POST" action="{{ route('admin.ops.backfills.migrate') }}" class="rounded-2xl border border-slate-200 p-4">
         @csrf
@@ -69,4 +89,3 @@
     @endif
   </div>
 @endsection
-

@@ -72,12 +72,7 @@ class DiscoverImageService
 
         [$title, $subtitle, $cta] = $this->buildOverlayText($post, $lang);
 
-        $visualBrief = $this->buildAiVisualBrief(
-            post: $post,
-            lang: $lang,
-            apiKey: $apiKey,
-            baseUri: $baseUri
-        );
+        $visualBrief = $this->buildTioBenIllustrationBrief($post);
 
         $prompt = $this->buildNoTextPrompt(
             post: $post,
@@ -197,6 +192,14 @@ class DiscoverImageService
         $url = Storage::disk('public')->url($relPath);
 
         return $url . (str_contains($url, '?') ? '' : ('?v=' . time()));
+    }
+
+    private function buildTioBenIllustrationBrief(Post $post): string
+    {
+        $title = Str::limit(trim((string) ($post->title ?? '')), 180, '');
+        $description = Str::limit(trim((string) ($post->meta_description ?? '')), 280, '');
+
+        return "Theme: {$title}. Context: {$description}. MANDATORY STYLE: create one active visual metaphor tied to the theme as a bold, warm, non-photorealistic Catholic editorial illustration. Use the Tio Ben IA visual language: warm gold, sky blue, deep navy, off-white, rounded expressive details, hand-drawn linework, layered textures, friendly digital mentor energy and subtle faith symbols. No logo reproduction, character portrait, photorealism or stock-photo look.";
     }
 
     private function buildAiVisualBrief(
@@ -406,7 +409,7 @@ O que evitar: natureza morta genérica com Bíblia, vela, terço e cruz.
 
         if ($lang === 'en') {
             return trim("
-Ultra-realistic editorial Catholic blog cover image.
+Dynamic editorial illustration for the IA Tio Ben Catholic blog.
 NO TEXT. NO readable words. NO logo. NO watermark.
 
 Article title:
@@ -428,17 +431,18 @@ Composition:
 - Horizontal 16:9.
 - Layout preference: {$layout}.
 - {$negativeSpace}
-- Premium editorial photography.
+- Premium contemporary illustration with expressive hand-drawn lines, layered textures and energetic composition.
 - Google Discover optimized.
 - Strong contextual main subject.
-- Natural depth, real environment, believable lighting.
-- Use environment, action and atmosphere to communicate the article.
+- Visual depth, layered shapes and expressive lighting.
+- Use environment, action and atmosphere to communicate the article through illustration.
 - No static tabletop composition unless the article specifically demands it.
 
 Visual style:
 - Mood: {$mood}.
-- Bright natural light.
-- Clean modern Catholic aesthetic.
+- Bright color blocks and clean modern Catholic aesthetic.
+- Use the Tio Ben IA visual language: warm gold, sky blue, deep navy and off-white, rounded expressive details, friendly digital mentor energy and subtle faith symbols.
+- Do not reproduce the logo or a character portrait.
 - Subtle accent hints: {$accent}.
 - {$accentEffect}.
 - Human, hopeful, reverent, contemporary.
@@ -449,7 +453,7 @@ Restrictions:
 - No identifiable faces.
 - No cheap stock-photo look.
 - No generic Bible + candle + rosary table scene.
-- No cartoon, anime, 3D render or childish illustration.
+- No photorealism, stock-photo look, realistic portrait, anime or childish illustration.
 - No saint, Jesus or Mary with a clearly defined realistic face.
 ");
         }

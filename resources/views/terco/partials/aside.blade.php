@@ -153,10 +153,10 @@
     ['href' => "{$blogBase}/rosary-prayers",         'title' => 'Rosary prayers',        'desc' => 'Our Father, Hail Mary, Glory, and closing.'],
     ['href' => "{$blogBase}/promises-of-the-rosary", 'title' => 'Promises of the Rosary','desc' => 'Meaning, devotion, and perseverance.'],
   ] : [
-    ['href' => "{$blogBase}/como-rezar-o-terco",     'title' => 'Como rezar o Terço',     'desc' => 'Passo a passo simples para criar constância.'],
-    ['href' => "{$blogBase}/misterios-do-terco",     'title' => 'Os mistérios do Santo Terço', 'desc' => 'Entenda cada conjunto e como meditar.'],
-    ['href' => "{$blogBase}/oracoes-do-terco",       'title' => 'Orações do Terço',       'desc' => 'Ave-Maria, Pai-Nosso, Glória e finais.'],
-    ['href' => "{$blogBase}/promessas-do-terco",     'title' => 'Promessas do Santo Terço','desc' => 'Sentido espiritual e perseverança na oração.'],
+    ['href' => '/santo-terco/como-rezar-o-terco',     'title' => 'Como rezar o Terço',     'desc' => 'Passo a passo simples para criar constância.'],
+    ['href' => "{$blogBase}/misterios-do-terco-por-dia-da-semana",     'title' => 'Os mistérios do Santo Terço', 'desc' => 'Entenda cada conjunto e como meditar.'],
+    ['href' => '/santo-terco',       'title' => 'Orações do Terço',       'desc' => 'Ave-Maria, Pai-Nosso, Glória e finais.'],
+    ['href' => "{$blogBase}/categoria/terco",     'title' => 'Mais sobre o Santo Terço','desc' => 'Reflexões para perseverar na oração.'],
   ];
 
   $effectiveBlogLinks = count($normalizedBlogLinks)

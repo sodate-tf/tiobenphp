@@ -8,6 +8,7 @@ use App\Http\Controllers\LiturgiaController;
 use App\Http\Controllers\DailyMassReadingsController;
 use App\Http\Controllers\Public\LiturgyYearController;
 use App\Http\Controllers\Public\LiturgyMonthController;
+use App\Http\Controllers\Public\LiturgyGuideHubController;
 use App\Http\Controllers\Public\RosaryController;
 
 
@@ -22,15 +23,18 @@ use App\Http\Controllers\Admin\PostCrossLinkController;
 use App\Http\Controllers\Admin\PostRelatedController;
 use App\Http\Controllers\Admin\PostCoverController;
 use App\Http\Controllers\Admin\OpsBackfillController;
+use App\Http\Controllers\Admin\PipelineGeneratorController;
 use App\Http\Controllers\Public\FinanceHubController;
 use App\Http\Controllers\Public\PrayerHubController;
 use App\Http\Controllers\Public\SacramentalLifeHubController;
 use App\Http\Controllers\Public\FaithQuestionsHubController;
 use App\Http\Controllers\Public\EnHubController;
+use App\Http\Controllers\Public\MobileBetaSignupController;
 
 use App\Http\Controllers\SitemapController;
 
 use App\Http\Controllers\WebStories\WebStoryController;
+use Illuminate\Support\Facades\File;
 
 /*
 |--------------------------------------------------------------------------
@@ -41,6 +45,17 @@ Route::middleware('auth')->get('/dashboard', function () {
     return redirect()->route('admin.dashboard');
 })->name('dashboard');
 
+Route::get('/app-ads.txt', function () {
+    $path = public_path('app-ads.txt');
+
+    if (File::exists($path)) {
+        return response(File::get($path), 200)
+            ->header('Content-Type', 'text/plain; charset=UTF-8');
+    }
+    return response('google.com, pub-8819996017476509, DIRECT, f08c47fec0942fa0', 200)
+        ->header('Content-Type', 'text/plain; charset=UTF-8');
+});
+
 
 /*
 |--------------------------------------------------------------------------
@@ -48,11 +63,11 @@ Route::middleware('auth')->get('/dashboard', function () {
 |--------------------------------------------------------------------------
 */
 Route::prefix('admin')
-    ->middleware(['web', 'auth', 'is_admin'])
+    ->middleware(['web', 'auth', 'is_admin', 'no_cache_admin'])
     ->name('admin.')
     ->group(function () {
 
-        Route::view('/', 'admin.dashboard')->name('dashboard');
+        Route::get('/', \App\Http\Controllers\Admin\DashboardController::class)->name('dashboard');
 
         // CRUD
         Route::resource('posts', PostController::class)->except(['show']);
@@ -84,6 +99,17 @@ Route::prefix('admin')
         Route::post('ops/backfills/migrate', [OpsBackfillController::class, 'migrate'])->name('ops.backfills.migrate');
         Route::post('ops/backfills/english', [OpsBackfillController::class, 'backfillEnglish'])->name('ops.backfills.english');
         Route::post('ops/backfills/pairs', [OpsBackfillController::class, 'backfillPairs'])->name('ops.backfills.pairs');
+        Route::get('ops/artisan', [OpsBackfillController::class, 'artisanRunner'])->name('ops.artisan.index');
+        Route::post('ops/artisan/run', [OpsBackfillController::class, 'runArtisanCommand'])->name('ops.artisan.run');
+        Route::get('ops/generator', [PipelineGeneratorController::class, 'create'])->name('ops.generator.create');
+        Route::post('ops/generator', [PipelineGeneratorController::class, 'store'])->name('ops.generator.store');
+        Route::get('ops/generator/status/{id}', [PipelineGeneratorController::class, 'status'])->name('ops.generator.status');
+
+
+        Route::get('mobile-beta-testers', [\App\Http\Controllers\Admin\MobileBetaTesterController::class, 'index'])
+            ->name('mobile-beta-testers.index');
+        Route::patch('mobile-beta-testers/{tester}/mark-sent', [\App\Http\Controllers\Admin\MobileBetaTesterController::class, 'markSent'])
+            ->name('mobile-beta-testers.mark-sent');
     });
 
 
@@ -124,6 +150,8 @@ Route::prefix('en')->middleware('locale:en')->group(function () {
 Route::get('/termo-de-responsabilidade', fn () => view('pt.termo-responsabilidade'))
     ->name('pt.terms');
 
+Route::view('/politica-de-privacidade', 'pt.politica-de-privacidade');
+
 Route::get('/en/terms-of-responsibility', fn () => view('en.terms-of-responsibility'))
     ->name('en.terms');
 
@@ -156,6 +184,10 @@ Route::get('/liturgia-diaria', [LiturgiaController::class, 'home'])
 Route::get('/liturgia-diaria/{data}', [LiturgiaController::class, 'day'])
     ->where('data', '\d{2}-\d{2}-\d{4}')
     ->name('liturgia.day');
+
+Route::post('/liturgia-diaria/mobile-beta-signup', [MobileBetaSignupController::class, 'store'])
+    ->middleware('locale:pt_BR')
+    ->name('liturgia.mobile-beta.store');
 
 Route::prefix('liturgia-diaria/ano')->group(function () {
     Route::get('{ano}', [LiturgyYearController::class, 'ptYear'])
@@ -336,6 +368,9 @@ Route::get('/sitemap-webstories.xml', [SitemapController::class, 'webstories'])
 Route::get('/sitemap-terco-webstories.xml', [SitemapController::class, 'tercoWebstories'])
     ->name('sitemap.terco.webstories');
 
+Route::get('/sitemap-terco.xml', [SitemapController::class, 'terco'])
+    ->name('sitemap.terco');
+
 Route::get('/sitemap-recent.xml', [SitemapController::class, 'recent'])
     ->name('sitemap.recent');
 
@@ -349,3 +384,6 @@ Route::get('/sitemap-terco-webstorie.xml', [SitemapController::class, 'tercoWebs
 |--------------------------------------------------------------------------
 */
 require __DIR__ . '/auth.php';
+Route::get('/guias/{guide}', [LiturgyGuideHubController::class, 'show'])
+    ->where('guide', 'liturgia-diaria|evangelho-do-dia|salmo-do-dia|calendario-liturgico')
+    ->name('liturgia.guides.show');

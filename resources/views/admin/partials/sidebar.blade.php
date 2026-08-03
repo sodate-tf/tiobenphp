@@ -34,11 +34,39 @@
       'show'   => \Illuminate\Support\Facades\Route::has('admin.related.index'),
     ],
     [
-      'label'  => 'Operacoes SEO/IA',
+      'label'  => 'Ops (Backfills)',
       'icon'   => 'Ops',
       'route'  => 'admin.ops.backfills.index',
-      'active' => request()->routeIs('admin.ops.backfills.*'),
+      'active' => request()->routeIs('admin.ops.backfills.*') || request()->routeIs('admin.ops.artisan.*') || request()->routeIs('admin.ops.generator.*'),
       'show'   => \Illuminate\Support\Facades\Route::has('admin.ops.backfills.index'),
+    ],
+    [
+      'label'  => 'Gerar Post IA',
+      'icon'   => 'AI',
+      'route'  => 'admin.ops.generator.create',
+      'active' => request()->routeIs('admin.ops.generator.*'),
+      'show'   => \Illuminate\Support\Facades\Route::has('admin.ops.generator.create'),
+    ],
+    [
+      'label'  => '',
+      'icon'   => 'Review',
+      'route'  => 'admin.pipeline-moderation.index',
+      'active' => request()->routeIs('admin.pipeline-moderation.*'),
+      'show'   => false,
+    ],
+    [
+      'label'  => 'Testadores do App',
+      'icon'   => 'Beta',
+      'route'  => 'admin.mobile-beta-testers.index',
+      'active' => request()->routeIs('admin.mobile-beta-testers.*'),
+      'show'   => \Illuminate\Support\Facades\Route::has('admin.mobile-beta-testers.index'),
+    ],
+    [
+      'label'  => 'Console Artisan',
+      'icon'   => 'CLI',
+      'route'  => 'admin.ops.artisan.index',
+      'active' => request()->routeIs('admin.ops.artisan.*'),
+      'show'   => \Illuminate\Support\Facades\Route::has('admin.ops.artisan.index'),
     ],
   ];
 
@@ -80,4 +108,3 @@
     </div>
   </div>
 </aside>
-

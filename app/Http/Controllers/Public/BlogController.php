@@ -87,6 +87,11 @@ class BlogController extends Controller
         $sections = $this->buildSections();
 
         $categoryLinks = collect($this->categoryThemes)
+            ->filter(function (array $theme): bool {
+                return $this->publicPostsQuery()
+                    ->whereHas('category', fn (Builder $q) => $q->where('name', $theme['name']))
+                    ->exists();
+            })
             ->map(fn ($theme, $slug) => [
                 'slug' => $slug,
                 'label' => $theme['label'],
@@ -159,7 +164,7 @@ class BlogController extends Controller
             ->withQueryString();
 
         if ($posts->total() === 0) {
-            abort(404);
+            return redirect()->route('blog.portal', [], 301);
         }
 
         return view('blog.category', [

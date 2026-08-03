@@ -36,10 +36,6 @@
   <link rel="preconnect" href="https://tpc.googlesyndication.com" crossorigin>
 
   {{-- AdSense carregado sem atraso --}}
-  <script async
-    src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8819996017476509"
-    crossorigin="anonymous"></script>
-
   <style>
     .lit-grid { display:block; }
     .lit-aside-desktop { display:none; }
@@ -57,9 +53,9 @@
     }
 
     .ads-slot { width:100%; }
-    .ads-slot-content { min-height:280px; }
-    .ads-slot-mobile { min-height:280px; }
-    .ads-slot-bottom { min-height:280px; }
+    .ads-slot-content { min-height:120px; }
+    .ads-slot-mobile { min-height:120px; }
+    .ads-slot-bottom { min-height:120px; }
     .ad-container { width:100%; }
 
     .cal-grid { display:grid; grid-template-columns: repeat(7, minmax(0, 1fr)); }
@@ -114,7 +110,7 @@
 
           <div class="ad-container mt-3">
             <ins class="adsbygoogle"
-                 style="display:block; width:100%; min-height:280px;"
+                 style="display:block; width:100%;"
                  data-ad-client="{{ $adClient }}"
                  data-ad-slot="{{ $slot }}"
                  data-ad-format="auto"
@@ -167,6 +163,9 @@
             Em cada dia você encontra as <strong>leituras da Missa</strong>, o <strong>salmo responsorial</strong> e o
             <strong>evangelho do dia</strong>.
           </p>
+
+          @include('liturgia.partials.mobile-beta-banner')
+
 
           <div class="mt-4 flex flex-wrap items-center gap-2">
             <a href="{{ $prevHref }}"

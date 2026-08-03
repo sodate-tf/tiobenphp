@@ -9,9 +9,33 @@ use Illuminate\Support\Facades\Artisan;
 
 class OpsBackfillController extends Controller
 {
+    /**
+     * Comandos permitidos para execucao via browser.
+     * Mantemos whitelist para evitar execucoes perigosas.
+     */
+    private const ALLOWED_ARTISAN_COMMANDS = [
+        'migrate',
+        'migrate:status',
+        'migrate:rollback',
+        'migrate:fresh',
+        'optimize:clear',
+        'cache:clear',
+        'config:clear',
+        'route:clear',
+        'view:clear',
+        'queue:restart',
+    ];
+
     public function index()
     {
         return view('admin.ops.backfill-runner');
+    }
+
+    public function artisanRunner()
+    {
+        return view('admin.ops.artisan-runner', [
+            'allowedCommands' => self::ALLOWED_ARTISAN_COMMANDS,
+        ]);
     }
 
     public function migrate(Request $request): RedirectResponse
@@ -71,5 +95,63 @@ class OpsBackfillController extends Controller
 
         return back()->with('success', $msg)->with('command_output', Artisan::output());
     }
-}
 
+    public function runArtisanCommand(Request $request): RedirectResponse
+    {
+        $data = $request->validate([
+            'command' => ['required', 'string', 'max:255'],
+        ]);
+
+        $raw = trim((string) $data['command']);
+        if ($raw === '') {
+            return back()->with('error', 'Informe um comando Artisan.');
+        }
+
+        $parts = preg_split('/\s+/', $raw) ?: [];
+        $signature = (string) array_shift($parts);
+
+        if (!in_array($signature, self::ALLOWED_ARTISAN_COMMANDS, true)) {
+            return back()->with('error', "Comando nao permitido: {$signature}");
+        }
+
+        $params = [];
+        foreach ($parts as $part) {
+            if (!str_starts_with($part, '--')) {
+                return back()->with('error', "Parametro invalido: {$part}. Use apenas flags --opcao ou --opcao=valor.");
+            }
+
+            $flag = substr($part, 2);
+            if ($flag === '') {
+                return back()->with('error', 'Flag vazia detectada no comando.');
+            }
+
+            if (str_contains($flag, '=')) {
+                [$key, $value] = explode('=', $flag, 2);
+                if ($key === '') {
+                    return back()->with('error', "Flag invalida: {$part}");
+                }
+                $params["--{$key}"] = $value;
+            } else {
+                $params["--{$flag}"] = true;
+            }
+        }
+
+        // forca --force em comandos de migrate para ambiente sem interacao
+        if ($signature === 'migrate' || $signature === 'migrate:rollback' || $signature === 'migrate:fresh') {
+            $params['--force'] = true;
+        }
+
+        @set_time_limit(600);
+        Artisan::call($signature, $params);
+
+        $rendered = $signature;
+        foreach ($params as $k => $v) {
+            $rendered .= $v === true ? " {$k}" : " {$k}={$v}";
+        }
+
+        return back()
+            ->with('success', "Comando executado: {$rendered}")
+            ->with('command_output', Artisan::output())
+            ->with('last_command', $raw);
+    }
+}

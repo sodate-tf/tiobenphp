@@ -8,6 +8,7 @@ use App\Http\Controllers\WebStories\WebStoryApiController;
 use App\Http\Controllers\Api\RemotePostController;
 use App\Http\Controllers\Api\PublishingPipelineController;
 use App\Http\Controllers\Api\IndexNowController;
+use App\Http\Controllers\Api\AppMobileController;
 
 /*
 |--------------------------------------------------------------------------
@@ -17,6 +18,28 @@ use App\Http\Controllers\Api\IndexNowController;
 
 Route::post('/perguntar', [PerguntarController::class, 'store'])
     ->name('api.perguntar');
+
+/*
+|--------------------------------------------------------------------------
+| App mobile publico
+|--------------------------------------------------------------------------
+*/
+
+Route::prefix('app')->name('api.app.')->group(function () {
+    Route::get('/home', [AppMobileController::class, 'home'])->name('home');
+    Route::get('/posts', [AppMobileController::class, 'posts'])->name('posts.index');
+    Route::get('/posts/{slug}', [AppMobileController::class, 'post'])
+        ->where('slug', '[A-Za-z0-9\-]+')
+        ->name('posts.show');
+    Route::get('/liturgy/today', [AppMobileController::class, 'liturgyToday'])->name('liturgy.today');
+    Route::get('/liturgy/{date}', [AppMobileController::class, 'liturgy'])
+        ->where('date', '\d{2}-\d{2}-\d{4}')
+        ->name('liturgy.show');
+    Route::get('/rosary/today', [AppMobileController::class, 'rosaryToday'])->name('rosary.today');
+    Route::get('/rosary/{set}', [AppMobileController::class, 'rosary'])
+        ->where('set', '[A-Za-z0-9\-]+')
+        ->name('rosary.show');
+});
 
 /*
 |--------------------------------------------------------------------------

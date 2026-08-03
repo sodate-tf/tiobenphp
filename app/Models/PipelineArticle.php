@@ -19,10 +19,22 @@ class PipelineArticle extends Model
         'content_raw','content_html',
         'title','slug','meta_description','keywords','cover_image_url',
         'published_at',
+        'moderation_status',
+        'quality_report',
+        'quality_checked_at',
+        'auto_published',
+        'review_notes',
+        'rejection_reason',
+        'reviewed_at',
+        'reviewed_by',
     ];
 
     protected $casts = [
         'date' => 'date',
         'published_at' => 'datetime',
+        'quality_checked_at' => 'datetime',
+        'reviewed_at' => 'datetime',
+        'quality_report' => 'array',
+        'auto_published' => 'boolean',
     ];
 }

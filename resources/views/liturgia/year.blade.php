@@ -80,11 +80,11 @@
   $asideMonth = (int)\Carbon\Carbon::parse($todayISO)->format('m');
 
   $defaultBlogLinks = [
-    ['href' => url('/blog/como-usar-a-liturgia-diaria'), 'title' => 'Como usar a Liturgia Diária', 'desc' => 'Um jeito simples de rezar e se preparar para a Missa.'],
+    ['href' => url('/blog/como-usar-a-liturgia'), 'title' => 'Como usar a Liturgia Diária', 'desc' => 'Um jeito simples de rezar e se preparar para a Missa.'],
     ['href' => url('/blog/ano-liturgico'), 'title' => 'Ano litúrgico: tempos, cores e calendário', 'desc' => 'Entenda o que muda ao longo do ano e como acompanhar.'],
-    ['href' => url('/blog/leituras-da-missa-guia'), 'title' => 'Guia das leituras da Missa', 'desc' => 'Primeira leitura, salmo, evangelho e como seguir.'],
-    ['href' => url('/blog/rezar-com-a-liturgia-em-5-minutos'), 'title' => 'Rezar com a Liturgia em 5 minutos', 'desc' => 'Um passo a passo para criar consistência.'],
-    ['href' => url('/blog/liturgia-diaria-vs-evangelho-do-dia'), 'title' => 'Liturgia Diária vs Evangelho do dia', 'desc' => 'O que cada um traz e quando usar.'],
+    ['href' => url('/blog/leituras-da-missa'), 'title' => 'Guia das leituras da Missa', 'desc' => 'Primeira leitura, salmo, evangelho e como seguir.'],
+    ['href' => url('/blog/como-rezar-com-a-liturgia-em-5-minutos'), 'title' => 'Rezar com a Liturgia em 5 minutos', 'desc' => 'Um passo a passo para criar consistência.'],
+    ['href' => url('/guias/evangelho-do-dia'), 'title' => 'Liturgia Diária vs Evangelho do dia', 'desc' => 'O que cada um traz e quando usar.'],
   ];
   $effectiveBlogLinks = $defaultBlogLinks;
 
@@ -135,6 +135,9 @@
             Escolha um mês para acessar a liturgia completa de cada dia, com <strong>leituras da Missa</strong>,
             <strong>salmo responsorial</strong> e <strong>evangelho do dia</strong>.
           </p>
+
+          @include('liturgia.partials.mobile-beta-banner')
+
 
           {{-- Navegação limitada + pesquisa --}}
           <div class="mt-4 flex flex-wrap items-center gap-2">

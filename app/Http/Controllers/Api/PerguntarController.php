@@ -4,8 +4,8 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Services\TioBenGeminiService;
-use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
 
 class PerguntarController extends Controller
@@ -15,7 +15,8 @@ class PerguntarController extends Controller
         try {
             $data = $request->validate([
                 'pergunta' => ['required', 'string', 'min:1', 'max:4000'],
-                'history'  => ['nullable', 'array'],
+                'lang' => ['nullable', 'in:pt,en'],
+                'history' => ['nullable', 'array'],
                 'history.*.role' => ['required_with:history', 'in:user,assistant'],
                 'history.*.content' => ['required_with:history', 'string', 'max:4000'],
             ]);
@@ -26,22 +27,17 @@ class PerguntarController extends Controller
             ], 422);
         }
 
-        $pergunta = trim($data['pergunta']);
-
-        // ✅ idioma automático
+        $pergunta = trim((string) $data['pergunta']);
         $referer = (string) $request->headers->get('referer', '');
-        $accept  = (string) $request->headers->get('accept-language', '');
-        $lang    = $this->detectLang($referer, $accept);
+        $accept = (string) $request->headers->get('accept-language', '');
+        $lang = (string) ($data['lang'] ?? $this->detectLang($referer, $accept));
 
-        // ✅ só as últimas 5 mensagens
         $history = is_array($data['history'] ?? null) ? $data['history'] : [];
         $history = array_slice($history, -5);
 
         try {
-            $resposta = $service->ask($pergunta, $history, $lang);
-
             return response()->json([
-                'resposta' => $resposta,
+                'resposta' => $service->ask($pergunta, $history, $lang),
             ]);
         } catch (\Throwable $e) {
             report($e);
@@ -50,25 +46,20 @@ class PerguntarController extends Controller
                 'success' => false,
                 'error' => $lang === 'en'
                     ? 'Sorry, I could not get a response right now.'
-                    : 'Desculpe, não consegui obter resposta agora.',
+                    : 'Desculpe, nao consegui obter resposta agora.',
             ], 500);
         }
     }
 
     private function detectLang(string $referer, string $acceptLanguage): string
     {
-        // 1) Referer: mais fiel ao idioma da página que chamou a API
         $ref = strtolower($referer);
 
-        // cobre: /en, /en/, /en/qualquer-coisa e query ?lang=en
         if (preg_match('~(^|/)en(/|$)~', $ref) || str_contains($ref, 'lang=en')) {
             return 'en';
         }
 
-        // 2) Fallback: Accept-Language
         $acc = strtolower($acceptLanguage);
-
-        // começa com en ou tem en na lista
         if (str_starts_with($acc, 'en') || str_contains($acc, ',en')) {
             return 'en';
         }

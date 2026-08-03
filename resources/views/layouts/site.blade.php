@@ -170,6 +170,11 @@
 
   @include('partials.footer')
 
+  @if(!str_starts_with($htmlLang, 'en'))
+    @include('partials.download-app-floating')
+    @include('partials.download-app-modal')
+  @endif
+
   @stack('scripts')
 
   @include('partials.analytics-ads', [

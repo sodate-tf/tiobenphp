@@ -384,7 +384,7 @@
               class="inline-flex items-center justify-center rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-semibold text-amber-900 shadow-sm transition hover:bg-amber-100 focus:outline-none focus:ring-2 focus:ring-amber-500">
               Como meditar os mistérios (blog)
             </a>
-            <a href="{{ url('/blog/erros-comuns-ao-rezar-o-terco') }}"
+            <a href="{{ url('/blog/rezar-o-terco-sozinho') }}"
               class="inline-flex items-center justify-center rounded-xl border border-border bg-card px-4 py-3 text-sm font-semibold shadow-sm transition hover:bg-muted focus:outline-none focus:ring-2 focus:ring-amber-500">
               Erros comuns ao rezar (blog)
             </a>

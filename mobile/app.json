@@ -1,0 +1,52 @@
+{
+    "expo":  {
+                 "name":  "IA Tio Ben",
+                 "slug":  "ia-tio-ben",
+                 "scheme":  "iatioben",
+                 "version":  "2.0.0",
+                 "orientation":  "portrait",
+                 "userInterfaceStyle":  "light",
+                 "newArchEnabled":  false,
+                 "jsEngine":  "hermes",
+                 "icon":  "./assets/app-icon.png",
+                 "assetBundlePatterns":  [
+                                             "**/*"
+                                         ],
+                 "ios":  {
+                             "supportsTablet":  true,
+                             "bundleIdentifier":  "br.com.iatioben.app"
+                         },
+                 "android":  {
+                                 "package":  "br.com.iatioben.app",
+                                 "versionCode":  33,
+                                 "adaptiveIcon":  {
+                                                      "foregroundImage":  "./assets/app-icon.png",
+                                                      "backgroundColor":  "#fef3c7"
+                                                  },
+                                 "googleServicesFile":  "./google-services.json"
+                             },
+                 "extra":  {
+                               "siteUrl":  "https://www.iatioben.com.br",
+                               "apiBaseUrl":  "https://www.iatioben.com.br/api/app",
+                               "eas":  {
+                                           "projectId":  "46f2436e-c7d4-4353-8e1f-5b7b6581fc09"
+                                       }
+                           },
+                 "plugins":  [
+                                 "expo-font",
+                                 "@react-native-firebase/app",
+                                 [
+                                     "expo-notifications",
+                                     {
+                                         "defaultChannel":  "daily-liturgy-reminders"
+                                     }
+                                 ]
+                             ]
+             },
+    "react-native-google-mobile-ads":  {
+                                           "android_app_id":  "ca-app-pub-8819996017476509~4824622274",
+                                           "delay_app_measurement_init":  true,
+                                           "optimize_initialization":  true,
+                                           "optimize_ad_loading":  true
+                                       }
+}

@@ -17,6 +17,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'locale'    => \App\Http\Middleware\SetLocale::class,
             'is_admin'  => \App\Http\Middleware\IsAdmin::class,
             'remote.key' => \App\Http\Middleware\RequireRemotePostApiKey::class,
+            'no_cache_admin' => \App\Http\Middleware\NoCacheAdmin::class,
         ]);
 
     })
