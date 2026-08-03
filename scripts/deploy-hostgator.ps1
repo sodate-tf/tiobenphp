@@ -71,7 +71,10 @@ git init
 git remote add origin https://github.com/sodate-tf/tiobenphp.git
 git fetch --depth=1 origin main
 git reset --hard origin/main
-composer install --no-dev --prefer-dist --no-interaction --optimize-autoloader
+COMPOSER_BIN="`$(command -v composer || true)"
+if [ -z "`$COMPOSER_BIN" ] && [ -x /opt/cpanel/composer/bin/composer ]; then COMPOSER_BIN=/opt/cpanel/composer/bin/composer; fi
+[ -n "`$COMPOSER_BIN" ] || { echo 'Composer nao encontrado. Verifique /opt/cpanel/composer/bin/composer no Jailed Shell.'; exit 127; }
+"`$COMPOSER_BIN" install --no-dev --prefer-dist --no-interaction --optimize-autoloader
 php artisan migrate --force
 php artisan optimize:clear
 php artisan view:cache
@@ -91,7 +94,10 @@ cd "`$APP_PATH"
 git fetch --prune origin main
 git checkout main
 git reset --hard origin/main
-composer install --no-dev --prefer-dist --no-interaction --optimize-autoloader
+COMPOSER_BIN="`$(command -v composer || true)"
+if [ -z "`$COMPOSER_BIN" ] && [ -x /opt/cpanel/composer/bin/composer ]; then COMPOSER_BIN=/opt/cpanel/composer/bin/composer; fi
+[ -n "`$COMPOSER_BIN" ] || { echo 'Composer nao encontrado. Verifique /opt/cpanel/composer/bin/composer no Jailed Shell.'; exit 127; }
+"`$COMPOSER_BIN" install --no-dev --prefer-dist --no-interaction --optimize-autoloader
 php artisan migrate --force
 php artisan optimize:clear
 "@
